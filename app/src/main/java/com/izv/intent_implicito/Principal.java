@@ -69,7 +69,10 @@ public class Principal extends Activity {
             fout.close();
             Toast.makeText(this, R.string.guardado, Toast.LENGTH_SHORT).show();
             finish();
+        }else{
+            Toast.makeText(this, R.string.error, Toast.LENGTH_SHORT).show();
         }
+
     }
 
     public boolean isModificable() {

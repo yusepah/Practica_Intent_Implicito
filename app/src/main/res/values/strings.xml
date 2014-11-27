@@ -4,5 +4,6 @@
     <string name="app_name">Editor</string>
     <string name="guardar">Guardar</string>
     <string name="guardado">Archivo Guardado</string>
+    <string name="error">Se ha producido un error.</string>
 
 </resources>
