@@ -3,12 +3,15 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.izv.implicitintent.R;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -19,7 +22,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 
-
+//lector de texto
 public class Principal extends Activity {
 
     EditText editor;
@@ -39,29 +42,59 @@ public class Principal extends Activity {
     }
 
     public void abrirArchivo(Intent intent){
-        if(intent.getType().equals("text/plain")){
-            File archivo = new File(path);
-            try {
-                BufferedReader in = new BufferedReader(new FileReader(archivo));
-                String linea;
-                StringBuilder texto = new StringBuilder("");
-                while ((linea = in.readLine()) != null) {
-                    texto.append(linea+'\n');
+        if(isLegible()) {
+            if (intent.getType().equals("text/plain")) {
+                File archivo = new File(path);
+                try {
+                    BufferedReader in = new BufferedReader(new FileReader(archivo));
+                    String linea;
+                    StringBuilder texto = new StringBuilder("");
+                    while ((linea = in.readLine()) != null) {
+                        texto.append(linea + '\n');
+                    }
+                    in.close();
+                    editor.setText(texto.toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                in.close();
-                editor.setText(texto.toString());
-            }catch(IOException e){
             }
         }
     }
 
     public void guardar(View view) throws IOException {
-        FileOutputStream archivo = new FileOutputStream(path);
-        OutputStreamWriter fout = new OutputStreamWriter(archivo);
-        fout.write(editor.getText().toString());
-        fout.close();
-        Toast.makeText(this, R.string.guardado, Toast.LENGTH_SHORT).show();
-        finish();
+        if (isModificable() && espacioSuficiente(new File(path))) {
+            FileOutputStream archivo = new FileOutputStream(path);
+            OutputStreamWriter fout = new OutputStreamWriter(archivo);
+            fout.write(editor.getText().toString());
+            fout.close();
+            Toast.makeText(this, R.string.guardado, Toast.LENGTH_SHORT).show();
+            finish();
+        }
+    }
+
+    public boolean isModificable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isLegible() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean espacioSuficiente(File f) {
+        double eTotal, eDisponible, porcentaje;
+        eTotal = (double) f.getTotalSpace();
+        eDisponible = (double) f.getFreeSpace();
+        porcentaje = (eDisponible / eTotal) * 100;
+        return porcentaje > 10;
     }
 
 
